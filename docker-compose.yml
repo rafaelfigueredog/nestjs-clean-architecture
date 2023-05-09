@@ -1,0 +1,70 @@
+version: '3'
+
+services:
+  mongodb-dev:
+    container_name: mongodb-dev
+    image: mongo:latest
+    env_file:
+      - .env.dev
+    environment:
+      - MONGODB_DATABASE=${MONGO_DATABASE}
+    ports:
+      - 27017:27017
+    networks:
+      - services-network
+
+  mongodb-test:
+    container_name: mongodb-test
+    image: mongo:latest
+    env_file:
+      - .env.test
+    environment:
+      - MONGODB_DATABASE=${MONGO_DATABASE}
+    ports:
+      - 27018:27017
+    networks:
+      - services-network
+
+  rabbitmq-dev:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-dev
+    hostname: rabbitmq-dev
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file:
+      - .env.dev
+    networks:
+      - services-network
+
+  rabbitmq-test:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-test
+    hostname: rabbitmq-test
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - 5673:5672
+      - 15673:15672
+    env_file:
+      - .env.test
+    networks:
+      - services-network
+
+  api:
+    container_name: api
+    env_file:
+    - .env
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - ${API_PORT}:${API_PORT}
+    networks:
+      - services-network
+
+networks:
+  services-network:
+    driver: bridge
